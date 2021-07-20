@@ -135,8 +135,6 @@ Hooks.on("renderChatLog", async function (chatLog, html, user) {
 
                     $("#" + tab + "Notification").hide();
                     break;
-                default:
-                    console.log("Unknown tab " + tab + "!");
             }
 
             $("#chat-log").scrollTop(9999999);
@@ -318,10 +316,10 @@ Hooks.on("preCreateChatMessage", (chatMessage, content) => {
             if (!chatMessage.data.whisper?.length) {
                 let message = chatMessage.data.content;
                 if (game.modules.get("polyglot")?.active) {
-                    import("../polyglot/src/polyglot.js");
-                    let lang = PolyGlot.languages[chatMessage.flags.polyglot.language] || chatMessage.flags.polyglot.language
-                    if (lang != PolyGlot.defaultLanguage) {
-                        message = lang + ": ||" + chatMessage.data.content + "||";
+                    const LanguageProvider = polyglot.polyglot.LanguageProvider;
+                    let lang = chatMessage.data.flags.polyglot.language
+                    if (lang != LanguageProvider.defaultLanguage) {
+                        message = LanguageProvider.languages[lang] + ": ||" + chatMessage.data.content + "||";
                     }
                 }
                 sendToDiscord(webhook, {
@@ -347,10 +345,10 @@ Hooks.on("preCreateChatMessage", (chatMessage, content) => {
             if (!chatMessage.data.whisper?.length) {
                 let message = chatMessage.data.content;
                 if (game.modules.get("polyglot")?.active) {
-                    import("../polyglot/src/polyglot.js");
-                    let lang = PolyGlot.languages[chatMessage.flags.polyglot.language] || chatMessage.flags.polyglot.language
-                    if (lang != PolyGlot.defaultLanguage) {
-                        message = lang + ": ||" + chatMessage.data.content + "||";
+                    let lang = chatMessage.data.flags.polyglot.language
+                    const LanguageProvider = polyglot.polyglot.LanguageProvider;
+                    if (lang != LanguageProvider.defaultLanguage) {
+                        message = LanguageProvider.languages[lang] + ": ||" + chatMessage.data.content + "||";
                     }
                 }
                 sendToDiscord(webhook, {
@@ -496,15 +494,18 @@ Hooks.on('ready', () => {
 });
 
 function setICNotifyProperties() {
-    $("#icNotification").css({'right': ($("div#sidebar.app").width() / 3 * 2).toString() + 'px'});
+    const nTabs = $("nav.tabbedchatlog.tabs > a.item").length;
+    $("#icNotification").css({'right': ($("div#sidebar.app").width() / nTabs * (nTabs - 1)).toString() + 'px'});
 };
 
 function setRollsNotifyProperties() {
-    $("#rollsNotification").css({'right': ($("div#sidebar.app").width() / 3).toString() + 'px'});
+    const nTabs = $("nav.tabbedchatlog.tabs > a.item").length;
+    $("#rollsNotification").css({'right': ($("div#sidebar.app").width() / nTabs * (nTabs - 2)).toString() + 'px'});
 };
 
 function setOOCNotifyProperties() {
-    //NO-OP Nothing to do
+    const nTabs = $("nav.tabbedchatlog.tabs > a.item").length;
+    $("#oocNotification").css({'right': ($("div#sidebar.app").width() / nTabs * (nTabs - 3)).toString() + 'px'});
 };
 
 function setALLTabsNotifyProperties() {
